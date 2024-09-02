@@ -1,23 +1,34 @@
-import os
 import subprocess
 from datetime import datetime
+import os
 
-# Get the current working directory
+
 repo_path = os.getcwd()
-file_path = os.path.join(repo_path, 'daily_commit.txt')
 
-# Write current date and time to the file
-with open(file_path, 'a') as f:
-    f.write(f'Commit made on {datetime.now()}\n')
 
-# Change to the repository directory
-os.chdir(repo_path)
+file_path = os.path.join(repo_path, "log.txt")
 
-# Add the file to the staging area
-subprocess.run(['git', 'add', file_path], check=True)
 
-# Commit the changes
-subprocess.run(['git', 'commit', '-m', 'Automated daily commit'], check=True)
+now = datetime.now()
+current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-# Push the changes
-subprocess.run(['git', 'push'], check=True)
+
+with open(file_path, "a") as file:
+    file.write(current_time + "\n")
+
+
+def run_git_command(command):
+    result = subprocess.run(command, cwd=repo_path, shell=True, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"Error: {result.stderr}")
+    return result.stdout
+
+
+run_git_command("git add .")
+
+
+commit_message = f"Auto-commit: updated log.txt on {current_time}"
+run_git_command(f'git commit -m "{commit_message}"')
+
+
+run_git_command("git push origin main")  
